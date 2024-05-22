@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:mysql1/mysql1.dart';
 
+var connectionSettings new ConnectionSettings(host: '127.0.0.1', port: 3306, user: 'root', password: 'root', db: 'bank',)
+
 void main() async {
 	// запуск web-сервера.
   var server = await HttpServer.bind(InternetAddress.anyIPv6, 8888);
@@ -9,7 +11,7 @@ void main() async {
  
     switch (request.uri.path) {
 		case "/":
-			//print(request.uri);
+			print(request.uri);
 			var uri = Uri.parse(request.uri.toString());
 			uri.queryParameters.forEach((k, v) {
 				print('key: $k - value: $v');
@@ -32,7 +34,7 @@ void ReadTpl(res) async {
 	File file = File("select.html");
 	var lines = await file.readAsLines();
 	for(final line in lines){
-	//	print(line);
+	print(line);
 		
 		if ((line != "@tr") && (line != "@ver")) {
 			res.write(line);
@@ -50,17 +52,17 @@ void ReadTpl(res) async {
 }
 
 Future<String> viewSelect(res) async {
-	final conn = await MySqlConnection.connect(new ConnectionSettings(host: '127.0.0.1',port: 3306,user: 'root',/*password: '',*/db: 'test',));
+	final conn = await MySqlConnection.connect(connectionSettings);
 	res.write('<table>');
-	var heads = await conn.query("SHOW COLUMNS FROM myarttable");
+	var heads = await conn.query("SHOW COLUMNS FROM Individuals");
 	res.write('<tr>');
 	for (var head in heads) {
 		res.write('<td>${head[0]}</td>');
-	//	print('${head[0]}');
+		print('${head[0]}');
 	}
 	res.write('</tr>');	
 	
-	var rows = await conn.query("SELECT * FROM myarttable WHERE id>14 ORDER BY id DESC");
+	var rows = await conn.query("SELECT * FROM Individuals ORDER BY id DESC");
 	for (var row in rows) {
 		res.write('<tr>');
 		for (var col in row) {
@@ -75,7 +77,7 @@ Future<String> viewSelect(res) async {
 }
 
 Future<String> viewVer(res) async {
-	final conn = await MySqlConnection.connect(new ConnectionSettings(host: '127.0.0.1',port: 3306,user: 'root',/*password: '',*/db: 'test',));
+	final conn = await MySqlConnection.connect(connectionSettings);
 	var vers = await conn.query("SELECT VERSION() AS ver");
 	for (var ver in vers) {
 		res.write('${ver[0]}');
@@ -90,14 +92,14 @@ Future<String> rowInsert(mass) async {
 	String sValue = '';
 	int i=0;
 	mass.forEach((k, v) {
-		//print('key: $k - value: $v');
+		print('key: $k - value: $v');
 		if (i>0){sValue = sValue+',';}
 		sValue = sValue+"'$v'";
 		i++;
 	});
-	sValue = 'INSERT INTO myarttable (text, description, keywords) VALUES ('+sValue+')';
+	sValue = 'INSERT INTO Individuals (first_name, last_name, middle_name, passport_number, inn_number, snils_number, driver_license_number, additional_documents, comment) VALUES ('+sValue+')';
 	
-	final conn = await MySqlConnection.connect(new ConnectionSettings(host: '127.0.0.1',port: 3306,user: 'root',/*password: '',*/db: 'test',));
+	final conn = await MySqlConnection.connect(connectionSettings);
 	await conn.query(sValue);
 	await conn.close();
 	print('Insert into table is good.');

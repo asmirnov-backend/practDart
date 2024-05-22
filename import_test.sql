@@ -1,52 +1,84 @@
--- Creation of a test base...
+-- Creation of a bank base...
 
-CREATE DATABASE test;
+CREATE DATABASE bank;
 
-USE test;
+USE bank;
 
-CREATE TABLE files (
-  id_file int(11) NOT NULL,
-  id_my int(11) NOT NULL,
-  description text NOT NULL,
-  name_origin text NOT NULL,
-  path text NOT NULL,
-  date_upload text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+START TRANSACTION;
 
-INSERT INTO files (id_file, id_my, description, name_origin, path, date_upload) VALUES
-(16, 17, 'Закачка из менеджера', 'test file 1.pdf', 'files/test_file1.pdf', '31-03-2023  20:07:59');
+CREATE TABLE `individuals` (
+  `id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `first_name` varchar(63) NOT NULL,
+  `last_name` varchar(63) NOT NULL,
+  `middle_name` varchar(63) NOT NULL,
+  `passport_number` int(11) NOT NULL,
+  `inn_number` int(11) NOT NULL,
+  `snils_number` int(11) NOT NULL,
+  `driver_license_number` int(11) NOT NULL,
+  `additional_documents` varchar(255) NOT NULL,
+  `comment` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='физические лица';
 
-CREATE TABLE myarttable (
-  id int(11) NOT NULL,
-  text text NOT NULL,
-  description text NOT NULL,
-  keywords text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+CREATE TABLE `borrowers` (
+  `id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `inn_number` int(11) NOT NULL,
+  `is_individual` tinyint(1) NOT NULL,
+  `address` varchar(127) NOT NULL,
+  `amount_total` float NOT NULL,
+  `conditions` text NOT NULL,
+  `legal_comments` text NOT NULL,
+  `contracts` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='«Заёмщики»';
 
-INSERT INTO myarttable (id, text, description, keywords) VALUES
-(17, 'Baranov', 'Engeneer', 'Ivanov'),
-(20, 'Fedorov', 'Cpp, Delphi, PHP, JS', '3t'),
-(92, 'Daniel', 'Artist', 'Theater Saturday'),
-(93, 'Andrew', 'Poet', 'First Electrotechnical University'),
-(94, 'Nikita', 'Student', 'Technological Institute'),
-(95, 'Ilya', 'Salesman', 'Hypermarket'),
-(96, 'Matvey', 'Programmer', 'Metropolitan College'),
-(97, 'Fedor', 'Loader', 'St. Petersburg State University'),
-(98, 'Ivan', 'Student', 'LETI'),
-(99, 'Alexey', 'Engineer', 'ITMO');
+CREATE TABLE `credits` (
+  `id` int(11) NOT NULL,
+  `individual_id` int(11) NOT NULL,
+  `organization_id` int(11) NOT NULL,
+  `amount` float NOT NULL,
+  `term` varchar(255) NOT NULL,
+  `percent` float NOT NULL,
+  `conditions` text NOT NULL,
+  `comment` varchar(255) NOT NULL,
+  `borrower_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='кредиты для организаций';
 
-ALTER TABLE files
-  ADD PRIMARY KEY (id_file),
-  ADD KEY id_my (id_my);
 
-ALTER TABLE myarttable
-  ADD PRIMARY KEY (id);
+--
+-- Индексы таблицы `credits`
+--
+ALTER TABLE `credits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `individual_id` (`individual_id`),
+  ADD KEY `borrower_id` (`borrower_id`);
 
-ALTER TABLE files
-  MODIFY id_file int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+--
+-- Ограничения внешнего ключа таблицы `credits`
+--
+ALTER TABLE `credits`
+  ADD CONSTRAINT `credits_ibfk_1` FOREIGN KEY (`individual_id`) REFERENCES `individuals` (`id`),
+  ADD CONSTRAINT `credits_ibfk_2` FOREIGN KEY (`borrower_id`) REFERENCES `borrowers` (`id`);
 
-ALTER TABLE myarttable
-  MODIFY id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+CREATE TABLE `money` (
+  `id` int(11) NOT NULL,
+  `individual_id` int(11) NOT NULL,
+  `amount` float NOT NULL,
+  `percent` float NOT NULL,
+  `term` varchar(355) NOT NULL,
+  `conditions` text NOT NULL,
+  `comment` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='заёмные средства';
 
-ALTER TABLE files
-  ADD CONSTRAINT files_ibfk_1 FOREIGN KEY (id_my) REFERENCES myarttable (id);
+--
+-- Индексы таблицы `money`
+--
+ALTER TABLE `money`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `individual_id` (`individual_id`);
+
+--
+-- Ограничения внешнего ключа таблицы `money`
+--
+ALTER TABLE `money`
+  ADD CONSTRAINT `money_ibfk_1` FOREIGN KEY (`individual_id`) REFERENCES `individuals` (`id`);
+
+COMMIT;
