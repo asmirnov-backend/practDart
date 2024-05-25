@@ -1,4 +1,4 @@
-CREATE TRIGGER update_trigger
+CREATE TRIGGER update_trigger_for_objects_table
 BEFORE UPDATE ON objects
 FOR EACH ROW
 BEGIN
