@@ -1,0 +1,4 @@
+CREATE PROCEDURE SelectAllFromObjects()
+BEGIN
+    SELECT * FROM objects ORDER BY id DESC;
+END;
