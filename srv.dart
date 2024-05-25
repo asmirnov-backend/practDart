@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:mysql1/mysql1.dart';
 
-var connectionSettings new ConnectionSettings(host: '127.0.0.1', port: 3306, user: 'root', password: 'root', db: 'bank',)
+var connectionSettings new ConnectionSettings(host: '127.0.0.1', port: 3306, user: 'root', password: 'root', db: 'observatory',)
 
 void main() async {
 	// запуск web-сервера.
@@ -54,7 +54,7 @@ void ReadTpl(res) async {
 Future<String> viewSelect(res) async {
 	final conn = await MySqlConnection.connect(connectionSettings);
 	res.write('<table>');
-	var heads = await conn.query("SHOW COLUMNS FROM Individuals");
+	var heads = await conn.query("SHOW COLUMNS FROM objects");
 	res.write('<tr>');
 	for (var head in heads) {
 		res.write('<td>${head[0]}</td>');
@@ -62,7 +62,7 @@ Future<String> viewSelect(res) async {
 	}
 	res.write('</tr>');	
 	
-	var rows = await conn.query("SELECT * FROM Individuals ORDER BY id DESC");
+	var rows = await conn.query("SelectAllFromObjects()");
 	for (var row in rows) {
 		res.write('<tr>');
 		for (var col in row) {
@@ -97,7 +97,7 @@ Future<String> rowInsert(mass) async {
 		sValue = sValue+"'$v'";
 		i++;
 	});
-	sValue = 'INSERT INTO Individuals (first_name, last_name, middle_name, passport_number, inn_number, snils_number, driver_license_number, additional_documents, comment) VALUES ('+sValue+')';
+	sValue = 'INSERT INTO objects (type, accuracy, amount, time, date, notes) VALUES ('+sValue+')';
 	
 	final conn = await MySqlConnection.connect(connectionSettings);
 	await conn.query(sValue);
