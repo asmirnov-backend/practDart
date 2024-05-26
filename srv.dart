@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:mysql1/mysql1.dart';
 
-var connectionSettings new ConnectionSettings(host: '127.0.0.1', port: 3306, user: 'root', password: 'root', db: 'observatory',)
+var connectionSettings = new ConnectionSettings(host: '127.0.0.1', port: 3306, user: 'root', db: 'observatory',);
 
 void main() async {
 	// запуск web-сервера.
@@ -14,9 +14,9 @@ void main() async {
 			print(request.uri);
 			var uri = Uri.parse(request.uri.toString());
 			uri.queryParameters.forEach((k, v) {
-				print('key: $k - value: $v');
+				// print('key: $k - value: $v');
 			});
-			print('Count: '+uri.queryParameters.length.toString());
+			// print('Count: '+uri.queryParameters.length.toString());
 			if (uri.queryParameters.length > 0) {
 				// добавление одной строки в таблицу.
 				rowInsert(uri.queryParameters);
@@ -34,7 +34,7 @@ void ReadTpl(res) async {
 	File file = File("select.html");
 	var lines = await file.readAsLines();
 	for(final line in lines){
-	print(line);
+	// print(line);
 		
 		if ((line != "@tr") && (line != "@ver")) {
 			res.write(line);
@@ -62,7 +62,7 @@ Future<String> viewSelect(res) async {
 	}
 	res.write('</tr>');	
 	
-	var rows = await conn.query("SelectAllFromObjects()");
+	var rows = await conn.query("CALL SelectAllFromObjects();");
 	for (var row in rows) {
 		res.write('<tr>');
 		for (var col in row) {
@@ -81,7 +81,7 @@ Future<String> viewVer(res) async {
 	var vers = await conn.query("SELECT VERSION() AS ver");
 	for (var ver in vers) {
 		res.write('${ver[0]}');
-		print('${ver[0]}');
+		// print('${ver[0]}');
 	}
 	await conn.close();
 	return Future.delayed(Duration(seconds: 0), () => "Hello Dart");
@@ -97,7 +97,7 @@ Future<String> rowInsert(mass) async {
 		sValue = sValue+"'$v'";
 		i++;
 	});
-	sValue = 'INSERT INTO objects (type, accuracy, amount, time, date, notes) VALUES ('+sValue+')';
+	sValue = 'INSERT INTO objects (id, type, accuracy, amount, time, date, notes) VALUES (${sValue})';
 	
 	final conn = await MySqlConnection.connect(connectionSettings);
 	await conn.query(sValue);
